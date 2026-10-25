@@ -86,7 +86,7 @@ class CourseListView(generic.ListView):
 
 class CourseDetailView(generic.DetailView):
     model = Course
-    template_name = 'onlinecourse/course_detail_bootstrap.html'
+    template_name = 'onlinecourse/course_details_bootstrap.html'
 
 
 def enroll(request, course_id):
@@ -122,22 +122,22 @@ def extract_answers(request):
     return submitted_answers
 
 
-# Show the exam result: total score, pass/fail and the result of each question
+# Show the exam result: total score, possible score, pass/fail and the result of each question
 def show_exam_result(request, course_id, submission_id):
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(Submission, pk=submission_id)
     selected_ids = [choice.id for choice in submission.choices.all()]
-    questions = Question.objects.filter(lesson__course=course)
-    total_mark = sum(question.grade for question in questions)
-    score = 0
+    questions = course.question_set.all()
+    possible = sum(question.grade for question in questions)
+    total_score = 0
     results = []
     for question in questions:
         got_score = question.is_get_score(selected_ids)
         if got_score:
-            score += question.grade
+            total_score += question.grade
         results.append({'question': question, 'passed': got_score,
                         'choices': question.choice_set.all()})
-    grade = round(score / total_mark * 100) if total_mark else 0
+    grade = round(total_score / possible * 100) if possible else 0
     context = {'course': course, 'selected_ids': selected_ids, 'grade': grade,
-               'score': score, 'total_mark': total_mark, 'results': results}
+               'total_score': total_score, 'possible': possible, 'results': results}
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)

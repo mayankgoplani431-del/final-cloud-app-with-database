@@ -95,11 +95,11 @@ class Enrollment(models.Model):
     rating = models.FloatField(default=5.0)
 
 
-# Question model: one question of a lesson's exam
+# Question model: one question of a course's exam
 class Question(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=500)
-    grade = models.IntegerField(default=50)
+    grade = models.IntegerField(default=1)
 
     def __str__(self):
         return self.question_text
@@ -126,3 +126,6 @@ class Choice(models.Model):
 class Submission(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice)
+
+    def __str__(self):
+        return "Submission of enrollment " + str(self.enrollment_id)
